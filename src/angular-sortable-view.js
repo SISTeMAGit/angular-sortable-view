@@ -456,7 +456,7 @@
 					html.addClass('sv-sorting-in-progress');
 					html.on('mousemove touchmove', onMousemove).on('mouseup touchend touchcancel', function mouseup(e){
 						html.off('mousemove touchmove', onMousemove);
-						html.off('mouseup touchend touchcancel', mouseup);
+						html.off('mouseup touchend', mouseup);
 						html.removeClass('sv-sorting-in-progress');
 						if(moveExecuted){
 							$controllers[0].$drop($scope.$index, opts);
@@ -464,9 +464,17 @@
 						$element.removeClass('sv-visibility-hidden');
 					});
 
-					// onMousemove(e);
-					function onMousemove(e){
-						touchFix(e);
+					var clickEvent = e;
+
+					function onMousemove(e) {
+
+					    if (clickEvent.clientX === e.clientX &&
+					        clickEvent.clientY === e.clientY) {
+					        e.stopPropagation();
+					        return false;
+					    }
+
+						touchFix(e, true);
 						if(!moveExecuted){
 							$element.parent().prepend(clone);
 							moveExecuted = true;
@@ -543,14 +551,16 @@
 		'</style>'
 	].join(''));
 
-	function touchFix(e){
+	function touchFix(e, preventDefault){
 		if(!('clientX' in e) && !('clientY' in e)) {
 			var touches = e.touches || e.originalEvent.touches;
 			if(touches && touches.length) {
 				e.clientX = touches[0].clientX;
 				e.clientY = touches[0].clientY;
 			}
-			e.preventDefault();
+			if(preventDefault) {
+				e.preventDefault();	
+			}
 		}
 	}
 
